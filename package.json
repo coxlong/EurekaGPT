@@ -21,6 +21,7 @@
     "vuetify": "^3.4.9"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
     "@mdi/font": "^7.4.47",
     "@types/node": "^20.10.5",
     "@types/uuid": "^9.0.7",
@@ -39,6 +40,6 @@
     "vite": "^5.0.8",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue-tsc": "^1.8.25",
-    "wrangler": "^3.22.2"
+    "wrangler": "^3.22.4"
   }
 }

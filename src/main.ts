@@ -3,10 +3,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia } from 'pinia'
 import { useSnackbarStore } from '@/stores/snackbar.ts'
 import 'reflect-metadata'
-import './style.css'
 import App from './App.vue'
 import 'virtual:svg-icons-register'
 import { createVuetify } from 'vuetify'
+import './style.css'
+import 'vuetify/styles'
 
 const routes = [
   { name: 'home', path: '/', component: () => import('@/views/chat.vue') },

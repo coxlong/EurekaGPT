@@ -7,7 +7,6 @@
     color="error"
   >
     {{ snackbarStore.text }}
-
     <template #actions>
       <v-btn variant="text" @click="snackbarStore.visible = false">
         Close
