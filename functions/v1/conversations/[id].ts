@@ -1,9 +1,11 @@
+import { PluginData } from '@cloudflare/pages-plugin-cloudflare-access'
 import { Env, IConversationMeta } from '../types'
 
 /*eslint no-undef: "off"*/
-export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const user = 'hello'
-  const conversationKey = `c:${user}:${context.params.id}`
+export const onRequestGet: PagesFunction<Env, any, PluginData> = async (
+  context
+) => {
+  const conversationKey = `c:${context.data.cloudflareAccess.JWT.payload.email}:${context.params.id}`
   const data =
     await context.env.EurekaKV.getWithMetadata<IConversationMeta>(
       conversationKey

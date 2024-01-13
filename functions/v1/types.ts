@@ -4,7 +4,7 @@ import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completion
 export interface Env {
   EurekaKV: KVNamespace
   OPENAI_API_BASE: string
-  KEY_PREFIX: string
+  DEVELOP: string
 }
 
 export interface IMessage {

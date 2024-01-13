@@ -1,4 +1,5 @@
 /*eslint no-undef: "off"*/
+import type { PluginData } from '@cloudflare/pages-plugin-cloudflare-access'
 import {
   ChatCompletionChunk,
   ChatCompletionCreateParamsBase,
@@ -96,9 +97,8 @@ async function save(
   request: ChatCompletionRequestParams,
   answer: string,
   answerId: string,
-  context: EventContext<Env, any, Record<string, unknown>>
+  context: EventContext<Env, any, PluginData>
 ) {
-  const user = 'hello'
   const conversationId = request.id === '' ? answerId : request.id
   let messageMap: IMessageMap = {}
   const meta: IConversationMeta = {
@@ -109,7 +109,7 @@ async function save(
     ...(request.temperature && { temperature: request.temperature }),
     updated_at: Date.now()
   }
-  const conversationKey = `c:${user}:${conversationId}`
+  const conversationKey = `c:${context.data.cloudflareAccess.JWT.payload.email}:${conversationId}`
   if (conversationId !== answerId) {
     const old =
       await context.env.EurekaKV.getWithMetadata<IConversationMeta>(
