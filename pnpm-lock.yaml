@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@cloudflare/pages-plugin-cloudflare-access':
+    specifier: ^1.0.3
+    version: 1.0.3
   axios:
     specifier: ^1.6.3
     version: 1.6.5
@@ -137,6 +140,10 @@ packages:
     dependencies:
       mime: 3.0.0
     dev: true
+
+  /@cloudflare/pages-plugin-cloudflare-access@1.0.3:
+    resolution: {integrity: sha512-hnKhUMvhMIFkLxwYO+b1Hw58nG5CJjCm5YVMJ5073NKxm8pHTk7gGUhy39ugvaXDJ0pAeb07axoyJb0L/4xIyg==}
+    dev: false
 
   /@cloudflare/workerd-darwin-64@1.20231218.0:
     resolution: {integrity: sha512-547gOmTIVmRdDy7HNAGJUPELa+fSDm2Y0OCxqAtQOz0GLTDu1vX61xYmsb2rn91+v3xW6eMttEIpbYokKjtfJA==}

@@ -1,9 +1,11 @@
 /*eslint no-undef: "off"*/
+import type { PluginData } from '@cloudflare/pages-plugin-cloudflare-access'
 import { Env, IConversationMeta } from './types'
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const user = 'hello'
-  const prefix = `c:${user}:`
+export const onRequestGet: PagesFunction<Env, any, PluginData> = async (
+  context
+) => {
+  const prefix = `c:${context.data.cloudflareAccess.JWT.payload.email}:`
   const value = await context.env.EurekaKV.list<IConversationMeta>({
     prefix: prefix
   })
