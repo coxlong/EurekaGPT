@@ -6,7 +6,12 @@
       class="flex-grow-1 flex-shrink-1 w-100 d-flex flex-column"
       style="flex-basis: 0; overflow-y: scroll"
     >
-      <div v-if="conversation.meta.id === '' && !running">
+      <div
+        v-if="
+          conversations.current.mapping.size === 0 &&
+          conversations.current.meta.current_node_id === ''
+        "
+      >
         <v-row no-gutters>
           <v-col lg="6" offset-lg="3" md="8" offset-md="2">
             <v-text-field
@@ -21,7 +26,7 @@
       <div v-for="id in messageIds" v-else :key="id">
         <v-row no-gutters>
           <v-col lg="6" offset-lg="3" md="8" offset-md="2">
-            <message :message-id="id" :conversation="conversation" />
+            <message :message-id="id" :conversation="conversations.current" />
           </v-col>
         </v-row>
       </div>
@@ -68,9 +73,9 @@ import { ref, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { v4 as uuidv4 } from 'uuid'
-import { Conversation } from '@/models/conversation'
 import { Role } from '@/models/constants'
 import OpenAI from 'openai'
+import { useConversationsStore } from '@/stores/conversations.ts'
 
 const theme = useTheme()
 const router = useRouter()
@@ -79,29 +84,29 @@ const prompt = ref<string>('')
 const running = ref<boolean>(false)
 const prevScrollPosition = ref(0)
 const allowAutoScroll = ref(false)
-const conversation = ref(new Conversation())
 const cancelFun = ref<Function | null>(null)
 const scrollDiv = ref<HTMLElement | null>(null)
+const conversations = useConversationsStore()
 
 const messageIds = computed(() => {
-  return conversation.value.getMessageIds(
-    conversation.value.meta.current_node_id
+  return conversations.current.getMessageIds(
+    conversations.current.meta.current_node_id
   )
 })
 
 const onSubmit = async () => {
   running.value = true
-  const parent_id = conversation.value.meta.current_node_id
+  const parent_id = conversations.current.meta.current_node_id
   const question = {
     id: uuidv4(),
     parent: parent_id,
     role: Role.User,
     content: prompt.value
   }
-  conversation.value.pushMessage(question)
+  conversations.current.pushMessage(question)
   prompt.value = ''
   scrollToBottom()
-  const create = conversation.value.meta.id === ''
+  const create = conversations.current.meta.id === ''
 
   const openai = new OpenAI({
     apiKey: apiKey.value,
@@ -109,36 +114,41 @@ const onSubmit = async () => {
     dangerouslyAllowBrowser: true
   })
   openai.chat.completions
-    .create(conversation.value.buildCompletionsRequest())
+    .create(conversations.current.buildCompletionsRequest())
     .then(async (stream) => {
       cancelFun.value = () => {
         stream.controller.abort()
       }
       allowAutoScroll.value = true
       for await (const chunk of stream) {
-        if (chunk.id !== conversation.value.meta.current_node_id) {
+        if (chunk.id !== conversations.current.meta.current_node_id) {
           if (create) {
-            conversation.value.meta.id = chunk.id
+            conversations.setCurrent(chunk.id, true, false)
           }
-          conversation.value.pushMessage({
+          conversations.current.pushMessage({
             id: chunk.id,
             role: 'assistant',
-            parent: conversation.value.meta.current_node_id,
+            parent: conversations.current.meta.current_node_id,
             content: ''
           })
         }
-        conversation.value.appendContent(chunk.choices[0]?.delta.content ?? '')
+        conversations.current.appendContent(
+          chunk.choices[0]?.delta.content ?? ''
+        )
         if (allowAutoScroll.value) {
           scrollToBottom()
         }
       }
     })
     .catch((e) => {
-      snackbar.error(e.error.message)
+      snackbar.error(e?.error?.message ?? e)
     })
     .finally(() => {
       running.value = false
       cancelFun.value = null
+      if (create) {
+        conversations.updateHistory()
+      }
     })
 }
 const onCancel = () => {
@@ -149,7 +159,7 @@ const onCancel = () => {
 }
 
 const onClear = () => {
-  conversation.value.clear()
+  conversations.current.clear()
   router.push('/')
 }
 
@@ -172,7 +182,7 @@ const scrollToBottom = async () => {
     }
   })
 }
-conversation.value.scrollToBottom = scrollToBottom
+conversations.current.scrollToBottom = scrollToBottom
 
 const handleKeyDown = (event: any) => {
   if (event.keyCode === 13 && event.ctrlKey) {

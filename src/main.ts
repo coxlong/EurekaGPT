@@ -1,13 +1,15 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia } from 'pinia'
-import { useSnackbarStore } from '@/stores/snackbar.ts'
 import 'reflect-metadata'
-import App from './App.vue'
 import 'virtual:svg-icons-register'
 import { createVuetify } from 'vuetify'
 import './style.css'
 import 'vuetify/styles'
+
+import App from './App.vue'
+import { useSnackbarStore } from '@/stores/snackbar.ts'
+import { useConversationsStore } from '@/stores/conversations.ts'
 
 const routes = [
   { name: 'home', path: '/', component: () => import('@/views/chat.vue') },
@@ -20,6 +22,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach(async (to, _, next) => {
+  if (to.name === 'chat') {
+    const conversations = useConversationsStore()
+    conversations.setCurrent(to.params.id as string, false, true)
+  }
+  next()
 })
 
 const pinia = createPinia()

@@ -49,7 +49,7 @@ import { Role } from '@/models/constants'
 import { computed, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useUserStore } from '@/stores/user'
-import { Conversation } from '@/models/conversation'
+import { Conversation } from '@/models/conversations'
 
 const { mdAndDown } = useDisplay()
 const userStore = useUserStore()

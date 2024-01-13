@@ -1,8 +1,10 @@
+import { plainToClassFromExist } from 'class-transformer'
 import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam
 } from 'openai/resources/chat/completions'
 import { Model } from './constants'
+import { GetConversationByID } from '@/api/conversations'
 
 interface IMessage {
   id: string
@@ -19,7 +21,7 @@ interface IMappingItem {
   message: IMessage
 }
 
-interface IConversationMeta {
+export interface IConversationMeta {
   id: string
   title: string
   model: string
@@ -28,6 +30,13 @@ interface IConversationMeta {
   current_node_id: string
   created_at?: number
   updated_at?: number
+}
+
+export interface IConversation {
+  meta: IConversationMeta
+  messages: {
+    [key: string]: IMessage
+  }
 }
 
 export class Conversation {
@@ -45,6 +54,43 @@ export class Conversation {
 
     this.mapping = new Map<string, IMappingItem>()
   }
+  init(id: string) {
+    GetConversationByID(id).then((res) => {
+      this.clear()
+      for (const [messageId, message] of Object.entries(res.messages)) {
+        if (this.mapping.has(messageId)) {
+          continue
+        }
+        this.mapping.set(messageId, {
+          id: messageId,
+          parent: message.parent,
+          children: [],
+          message: message
+        })
+        if (!this.mapping.has(message.parent)) {
+          const parent = res.messages[message.parent]
+          this.mapping.set(message.parent, {
+            id: message.parent,
+            parent: parent?.id ?? '',
+            children: [messageId],
+            message: parent
+          })
+        } else {
+          const parent = this.mapping.get(message.parent)
+          if (parent) {
+            parent.children.push(messageId)
+          }
+        }
+      }
+
+      plainToClassFromExist(this.meta, res.meta)
+      setTimeout(() => {
+        if (this.scrollToBottom !== null) {
+          this.scrollToBottom()
+        }
+      }, 100)
+    })
+  }
 
   clear() {
     this.meta.id = ''
@@ -58,7 +104,11 @@ export class Conversation {
   getMessageIds(leafId: string): string[] {
     let result: string[] = []
     let curId = leafId
-    while (this.mapping.has(curId) && this.mapping.get(curId)?.message) {
+    while (
+      curId !== '' &&
+      this.mapping.has(curId) &&
+      this.mapping.get(curId)?.message
+    ) {
       const curMessage = this.mapping.get(curId) as IMappingItem
       result.unshift(curMessage.message.id)
       curId = curMessage.parent
@@ -107,6 +157,7 @@ export class Conversation {
     return this.mapping.get(id)?.message as IMessage
   }
   getPeerIds(id: string): string[] {
+    console.log('eeeeee', id)
     return this.mapping.get(this.getMessage(id).parent)?.children ?? []
   }
   buildCompletionsRequest(): ChatCompletionCreateParamsStreaming {
@@ -114,16 +165,24 @@ export class Conversation {
     const historyIds = this.getMessageIds(this.meta.current_node_id)
     historyIds.forEach((id) => {
       const message = this.getMessage(id)
-      messages.push({
-        role: message.role,
-        content: message.content
-      })
+      if (
+        (this.meta.id === '' && message.role === 'system') ||
+        message.id === this.meta.current_node_id
+      ) {
+        messages.push(message)
+      } else {
+        messages.push({
+          role: message.role,
+          content: message.content
+        })
+      }
     })
     return {
+      id: this.meta.id,
       model: this.meta.model,
       messages: messages,
       stream: true
-    }
+    } as ChatCompletionCreateParamsStreaming
   }
   appendContent(content: string) {
     this.getMessage(this.meta.current_node_id).content += content
