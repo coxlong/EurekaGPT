@@ -8,8 +8,10 @@ import './style.css'
 import 'vuetify/styles'
 
 import App from './App.vue'
+import { useUserStore } from '@/stores/user'
 import { useSnackbarStore } from '@/stores/snackbar.ts'
 import { useConversationsStore } from '@/stores/conversations.ts'
+import { GetUser } from './api/user'
 
 const routes = [
   { name: 'home', path: '/', component: () => import('@/views/chat.vue') },
@@ -25,6 +27,9 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, _, next) => {
+  const userStore = useUserStore()
+  const res = await GetUser()
+  userStore.update(res)
   if (to.name === 'chat') {
     const conversations = useConversationsStore()
     conversations.setCurrent(to.params.id as string, false, true)

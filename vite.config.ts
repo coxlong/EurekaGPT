@@ -36,7 +36,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       // 运行是否自动打开浏览器
       open: false,
       proxy: {
-        ['/v1']: {
+        ['/api']: {
           changeOrigin: true,
           target: env.VITE_APP_API_URL,
           rewrite: (path) => path
