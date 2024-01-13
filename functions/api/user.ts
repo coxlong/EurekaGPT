@@ -20,7 +20,7 @@ export const onRequest: PagesFunction<unknown, any, PluginData> = async ({
   } else if (identity.idp.type === 'github') {
     user.username = identity.name
     user.email = identity.email
-    user.avatar = `https://github.com/${identity.name}.png`
+    user.avatar = `https://avatars.githubusercontent.com/u/${identity.id}?v=4`
   }
   return new Response(JSON.stringify(user), {
     headers: {
