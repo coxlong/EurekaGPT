@@ -17,9 +17,9 @@
         <v-divider />
         <v-list>
           <v-list-item
-            prepend-avatar="https://cdn.vuetifyjs.com/images/john.png"
+            :prepend-avatar="userStore.avatar"
             :title="userStore.username"
-            :subtitle="`${userStore.username}@example.com`"
+            :subtitle="`${userStore.email}`"
             color="primary"
             rounded="xl"
           >
