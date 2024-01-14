@@ -157,7 +157,6 @@ export class Conversation {
     return this.mapping.get(id)?.message as IMessage
   }
   getPeerIds(id: string): string[] {
-    console.log('eeeeee', id)
     return this.mapping.get(this.getMessage(id).parent)?.children ?? []
   }
   buildCompletionsRequest(): ChatCompletionCreateParamsStreaming {
