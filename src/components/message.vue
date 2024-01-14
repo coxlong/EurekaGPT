@@ -7,9 +7,7 @@
       <svg-icon icon-class="chat" size="30" />
     </v-avatar>
     <v-avatar v-else color="red" class="ma-2">
-      <span class="text-h5" style="text-transform: uppercase !important">{{
-        userStore.username.at(0)
-      }}</span>
+      <v-img :src="userStore.avatar" :alt="userStore.username" />
     </v-avatar>
     <div
       class="d-flex flex-column w-100 pt-3"

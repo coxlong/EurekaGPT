@@ -13,15 +13,6 @@ export const useConversationsStore = defineStore('conversations', {
         this.history.length = 0
         this.history.push(...res)
       })
-    },
-    setCurrent(id: string, updateRoute: boolean, updateData: boolean) {
-      this.current.meta.id = id
-      if (updateRoute) {
-        window.history.pushState(null, '', `/c/${id}`)
-      }
-      if (updateData) {
-        this.current.init(id)
-      }
     }
   }
 })

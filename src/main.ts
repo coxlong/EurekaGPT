@@ -27,12 +27,10 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, _, next) => {
-  const userStore = useUserStore()
-  const res = await GetUser()
-  userStore.update(res)
   if (to.name === 'chat') {
     const conversations = useConversationsStore()
-    conversations.setCurrent(to.params.id as string, false, true)
+    const id = to.params.id as string
+    conversations.current.init(id)
   }
   next()
 })
@@ -51,4 +49,9 @@ window.snackbar = {
     snackbarStore.show(text)
   }
 }
+const userStore = useUserStore()
+GetUser().then((res) => {
+  userStore.update(res)
+})
+
 app.mount('#app')

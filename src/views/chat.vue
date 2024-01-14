@@ -6,6 +6,7 @@
           v-for="item in items"
           :key="item.value"
           :value="item.value"
+          :active="conversations.current.meta.id === item.value"
           color="primary"
           rounded="xl"
         >
@@ -43,6 +44,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useUserStore } from '@/stores/user'
 import { useConversationsStore } from '@/stores/conversations.ts'
@@ -51,6 +53,7 @@ const { mobile } = useDisplay()
 const drawer = ref(!mobile.value)
 const userStore = useUserStore()
 const conversations = useConversationsStore()
+const router = useRouter()
 
 onMounted(() => {
   conversations.updateHistory()
@@ -108,7 +111,7 @@ const items = computed(() => {
 })
 
 const onToggleConversation = (item: any) => {
-  conversations.setCurrent(item.id, true, true)
+  router.push(`/c/${item.id}`)
 }
 </script>
 

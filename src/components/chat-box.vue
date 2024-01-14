@@ -123,7 +123,7 @@ const onSubmit = async () => {
       for await (const chunk of stream) {
         if (chunk.id !== conversations.current.meta.current_node_id) {
           if (create) {
-            conversations.setCurrent(chunk.id, true, false)
+            conversations.current.meta.id = chunk.id
           }
           conversations.current.pushMessage({
             id: chunk.id,
@@ -148,6 +148,7 @@ const onSubmit = async () => {
       cancelFun.value = null
       if (create) {
         conversations.updateHistory()
+        router.push(`/c/${conversations.current.meta.id}`)
       }
     })
 }
