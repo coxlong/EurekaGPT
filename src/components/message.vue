@@ -6,8 +6,8 @@
     <v-avatar v-if="isAssistant" color="primary" class="ma-2">
       <svg-icon icon-class="chat" size="30" />
     </v-avatar>
-    <v-avatar v-else color="red" class="ma-2">
-      <v-img :src="userStore.avatar" :alt="userStore.username" />
+    <v-avatar v-else color="primary" class="ma-2">
+      <img :src="userStore.avatar" class="w-100" :alt="userStore.username" />
     </v-avatar>
     <div
       class="d-flex flex-column w-100 pt-3"
