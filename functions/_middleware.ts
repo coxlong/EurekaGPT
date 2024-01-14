@@ -1,6 +1,6 @@
 /*eslint no-undef: "off"*/
 import cloudflareAccessPlugin from '@cloudflare/pages-plugin-cloudflare-access'
-import { Env } from './v1/types'
+import { Env } from './api/types'
 
 async function errorHandler(context) {
   try {
@@ -16,7 +16,7 @@ const authentication: PagesFunction<Env> = (context) => {
       cloudflareAccess: {
         JWT: {
           payload: {
-            email: 'coxlong@qq.com'
+            email: 'test@example.com'
           }
         }
       }
