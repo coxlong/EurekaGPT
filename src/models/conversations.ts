@@ -58,28 +58,22 @@ export class Conversation {
     GetConversationByID(id).then((res) => {
       this.clear()
       for (const [messageId, message] of Object.entries(res.messages)) {
-        if (this.mapping.has(messageId)) {
-          continue
-        }
         this.mapping.set(messageId, {
           id: messageId,
           parent: message.parent,
           children: [],
           message: message
         })
-        if (!this.mapping.has(message.parent)) {
-          const parent = res.messages[message.parent]
-          this.mapping.set(message.parent, {
-            id: message.parent,
-            parent: parent?.id ?? '',
-            children: [messageId],
-            message: parent
-          })
-        } else {
-          const parent = this.mapping.get(message.parent)
-          if (parent) {
-            parent.children.push(messageId)
-          }
+      }
+      this.mapping.set('', {
+        id: '',
+        parent: '',
+        children: []
+      } as unknown as IMappingItem)
+      for (const [messageId, message] of Object.entries(res.messages)) {
+        const parent = this.mapping.get(message.parent)
+        if (parent) {
+          parent.children.push(messageId)
         }
       }
 

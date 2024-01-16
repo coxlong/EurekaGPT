@@ -74,8 +74,8 @@ import { useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { v4 as uuidv4 } from 'uuid'
 import { Role } from '@/models/constants'
-import OpenAI from 'openai'
 import { useConversationsStore } from '@/stores/conversations.ts'
+import { StreamCompletions } from '@/api/conversations'
 
 const theme = useTheme()
 const router = useRouter()
@@ -108,13 +108,10 @@ const onSubmit = async () => {
   scrollToBottom()
   const create = conversations.current.meta.id === ''
 
-  const openai = new OpenAI({
-    apiKey: apiKey.value,
-    baseURL: window.location.origin + import.meta.env.VITE_APP_BASE_API,
-    dangerouslyAllowBrowser: true
-  })
-  openai.chat.completions
-    .create(conversations.current.buildCompletionsRequest())
+  StreamCompletions(
+    apiKey.value,
+    conversations.current.buildCompletionsRequest()
+  )
     .then(async (stream) => {
       cancelFun.value = () => {
         stream.controller.abort()
@@ -139,6 +136,10 @@ const onSubmit = async () => {
           scrollToBottom()
         }
       }
+      if (create) {
+        conversations.updateHistory()
+        router.push(`/c/${conversations.current.meta.id}`)
+      }
     })
     .catch((e) => {
       snackbar.error(e?.error?.message ?? e)
@@ -146,10 +147,6 @@ const onSubmit = async () => {
     .finally(() => {
       running.value = false
       cancelFun.value = null
-      if (create) {
-        conversations.updateHistory()
-        router.push(`/c/${conversations.current.meta.id}`)
-      }
     })
 }
 const onCancel = () => {
