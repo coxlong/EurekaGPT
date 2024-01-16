@@ -11,9 +11,14 @@ import App from './App.vue'
 import { useUserStore } from '@/stores/user'
 import { useSnackbarStore } from '@/stores/snackbar.ts'
 import { useConversationsStore } from '@/stores/conversations.ts'
-import { GetUser } from './api/user'
+import { GetUser } from './api/auth'
 
 const routes = [
+  {
+    name: 'login',
+    path: '/login',
+    component: () => import('@/views/login.vue')
+  },
   { name: 'home', path: '/', component: () => import('@/views/chat.vue') },
   { name: 'chat', path: '/c/:id', component: () => import('@/views/chat.vue') },
   {
@@ -27,6 +32,28 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, _, next) => {
+  const userStore = useUserStore()
+
+  if (to.name === 'login') {
+    if (userStore.id !== '') {
+      next({ name: 'home' })
+    } else {
+      next()
+    }
+    return
+  }
+
+  if (userStore.id === '') {
+    const userInfo = await GetUser().catch((_) => {
+      next({ name: 'login' })
+    })
+    if (!userInfo) {
+      snackbar.error('get user info failed')
+      return
+    }
+    userStore.update(userInfo)
+  }
+
   if (to.name === 'chat') {
     const conversations = useConversationsStore()
     const id = to.params.id as string
@@ -49,9 +76,4 @@ window.snackbar = {
     snackbarStore.show(text)
   }
 }
-const userStore = useUserStore()
-GetUser().then((res) => {
-  userStore.update(res)
-})
-
 app.mount('#app')
