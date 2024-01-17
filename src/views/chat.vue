@@ -56,7 +56,7 @@ const conversations = useConversationsStore()
 const router = useRouter()
 
 onMounted(() => {
-  conversations.updateHistory()
+  conversations.updateHistory(false)
 })
 
 const items = computed(() => {

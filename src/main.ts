@@ -11,6 +11,7 @@ import App from './App.vue'
 import { useUserStore } from '@/stores/user'
 import { useSnackbarStore } from '@/stores/snackbar.ts'
 import { useConversationsStore } from '@/stores/conversations.ts'
+import { useConfigStore } from '@/stores/config.ts'
 import { GetUser } from './api/auth'
 
 const routes = [
@@ -77,3 +78,13 @@ window.snackbar = {
   }
 }
 app.mount('#app')
+
+window.addEventListener('beforeunload', () => {
+  const configStore = useConfigStore()
+  localStorage.setItem('eureka_config', configStore.saveConfig())
+})
+
+window.addEventListener('load', () => {
+  const configStore = useConfigStore()
+  configStore.loadConfig(localStorage.getItem('eureka_config'))
+})
