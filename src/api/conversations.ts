@@ -34,3 +34,16 @@ export function GetConversations(): Promise<IConversationMeta[]> {
     method: 'GET'
   })
 }
+
+export function UpdateConversationTitle(
+  id: string,
+  title: string
+): Promise<IConversation> {
+  return request({
+    url: `/conversations/${id}`,
+    method: 'PUT',
+    data: {
+      title: title
+    }
+  })
+}

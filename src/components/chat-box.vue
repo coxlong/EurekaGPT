@@ -14,9 +14,25 @@
       >
         <v-row no-gutters>
           <v-col lg="6" offset-lg="3" md="8" offset-md="2">
+            <v-select
+              v-model="conversations.current.meta.model"
+              label="Model"
+              :items="['gpt-3.5-turbo', 'gpt-4']"
+              variant="solo"
+            />
+          </v-col>
+          <v-col lg="6" offset-lg="3" md="8" offset-md="2">
             <v-text-field
-              v-model="apiKey"
-              label="ApiKey"
+              v-model="configStore.gpt_3_api_key"
+              label="ApiKey3"
+              variant="outlined"
+              class="mt-2"
+            />
+          </v-col>
+          <v-col lg="6" offset-lg="3" md="8" offset-md="2">
+            <v-text-field
+              v-model="configStore.gpt_4_api_key"
+              label="ApiKey4"
               variant="outlined"
               class="mt-2"
             />
@@ -75,11 +91,11 @@ import { useTheme } from 'vuetify'
 import { v4 as uuidv4 } from 'uuid'
 import { Role } from '@/models/constants'
 import { useConversationsStore } from '@/stores/conversations.ts'
+import { useConfigStore } from '@/stores/config'
 import { StreamCompletions } from '@/api/conversations'
 
 const theme = useTheme()
 const router = useRouter()
-const apiKey = ref<string>('')
 const prompt = ref<string>('')
 const running = ref<boolean>(false)
 const prevScrollPosition = ref(0)
@@ -87,6 +103,7 @@ const allowAutoScroll = ref(false)
 const cancelFun = ref<Function | null>(null)
 const scrollDiv = ref<HTMLElement | null>(null)
 const conversations = useConversationsStore()
+const configStore = useConfigStore()
 
 const messageIds = computed(() => {
   return conversations.current.getMessageIds(
@@ -109,7 +126,7 @@ const onSubmit = async () => {
   const create = conversations.current.meta.id === ''
 
   StreamCompletions(
-    apiKey.value,
+    configStore.getAPIKeyByModel(conversations.current.meta.model),
     conversations.current.buildCompletionsRequest()
   )
     .then(async (stream) => {
@@ -137,7 +154,7 @@ const onSubmit = async () => {
         }
       }
       if (create) {
-        conversations.updateHistory()
+        conversations.updateHistory(true)
         router.push(`/c/${conversations.current.meta.id}`)
       }
     })

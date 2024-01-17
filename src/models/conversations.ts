@@ -174,7 +174,8 @@ export class Conversation {
       id: this.meta.id,
       model: this.meta.model,
       messages: messages,
-      stream: true
+      stream: true,
+      save: true
     } as ChatCompletionCreateParamsStreaming
   }
   appendContent(content: string) {
