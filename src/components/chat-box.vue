@@ -42,7 +42,13 @@
       <div v-for="id in messageIds" v-else :key="id">
         <v-row no-gutters>
           <v-col lg="6" offset-lg="3" md="8" offset-md="2">
-            <message :message-id="id" :conversation="conversations.current" />
+            <message
+              :message-id="id"
+              :conversation="conversations.current"
+              :regenerate="regenerate"
+              :resubmit="resubmit"
+              :running="running"
+            />
           </v-col>
         </v-row>
       </div>
@@ -112,7 +118,6 @@ const messageIds = computed(() => {
 })
 
 const onSubmit = async () => {
-  running.value = true
   const parent_id = conversations.current.meta.current_node_id
   const question = {
     id: uuidv4(),
@@ -120,14 +125,39 @@ const onSubmit = async () => {
     role: Role.User,
     content: prompt.value
   }
+  const newMsg = new Set([question.id])
   conversations.current.pushMessage(question)
   prompt.value = ''
   scrollToBottom()
   const create = conversations.current.meta.id === ''
+  request(create, newMsg)
+}
 
+const resubmit = (qContent: string, oldQuestionId: string) => {
+  const oldQuestion = conversations.current.getMessage(oldQuestionId)
+  const parent_id = oldQuestion.parent
+  conversations.current.meta.current_node_id = parent_id
+  const question = {
+    id: uuidv4(),
+    parent: parent_id,
+    role: Role.User,
+    content: qContent
+  }
+  const newMsg = new Set([question.id])
+  conversations.current.pushMessage(question)
+  request(false, newMsg)
+}
+
+const regenerate = (questionId: string) => {
+  conversations.current.meta.current_node_id = questionId
+  request(false, new Set<string>())
+}
+
+const request = (create: boolean, newMsg: Set<string>) => {
+  running.value = true
   StreamCompletions(
     configStore.getAPIKeyByModel(conversations.current.meta.model),
-    conversations.current.buildCompletionsRequest()
+    conversations.current.buildCompletionsRequest(newMsg)
   )
     .then(async (stream) => {
       cancelFun.value = () => {
@@ -166,6 +196,7 @@ const onSubmit = async () => {
       cancelFun.value = null
     })
 }
+
 const onCancel = () => {
   if (cancelFun.value !== null) {
     cancelFun.value()
@@ -204,7 +235,11 @@ const handleKeyDown = (event: any) => {
     if (running.value) {
       onCancel()
     } else {
-      onSubmit()
+      if (conversations.current.resubmit === null) {
+        onSubmit()
+      } else {
+        conversations.current.resubmit()
+      }
     }
   }
 }

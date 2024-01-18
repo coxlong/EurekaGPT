@@ -23,7 +23,7 @@ export const useConversationsStore = defineStore('conversations', {
       })
     },
     genTitle() {
-      const req = this.current.buildCompletionsRequest() as any
+      const req = this.current.buildCompletionsRequest(new Set<string>()) as any
       req.save = false
       req.model = 'gpt-3.5-turbo'
       req.messages.push({

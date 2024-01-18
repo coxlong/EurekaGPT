@@ -21,12 +21,18 @@
               :key="idx"
               :value="idx + 1"
             >
-              {{ conversation.getMessage(id).content }}
+              <v-textarea
+                v-if="editing"
+                v-model="input"
+                label="Label"
+                variant="solo"
+              />
+              <span v-else>{{ conversation.getMessage(id).content }}</span>
             </v-window-item>
           </v-window>
         </div>
       </v-card>
-      <v-card-actions>
+      <v-card-actions v-if="!editing">
         <v-pagination
           v-if="peerIds.length > 1"
           v-model="page"
@@ -37,6 +43,26 @@
           rounded="circle"
           class="message-pagination"
         />
+        <v-btn
+          v-if="isAssistant && !running"
+          density="compact"
+          icon="mdi-refresh"
+          @click="regenerate(message.parent)"
+        />
+        <v-btn
+          v-if="!isAssistant && !running"
+          density="compact"
+          icon="mdi-pencil"
+          @click="onEdit"
+        />
+      </v-card-actions>
+      <v-card-actions v-else>
+        <v-btn density="compact" icon="mdi-refresh" @click="onResubmit">
+          确定
+        </v-btn>
+        <v-btn density="compact" icon="mdi-refresh" @click="editing = false">
+          取消
+        </v-btn>
       </v-card-actions>
     </div>
   </div>
@@ -54,6 +80,9 @@ const userStore = useUserStore()
 const props = defineProps<{
   messageId: string
   conversation: Conversation
+  running: boolean
+  regenerate: Function
+  resubmit: Function
 }>()
 const peerIds = props.conversation.getPeerIds(props.messageId)
 let messageIdx = 0
@@ -64,13 +93,31 @@ for (let i = 0; i < peerIds.length; i++) {
   }
 }
 
+const editing = ref(false)
+const input = ref('')
+
 const page = ref(messageIdx)
-const isAssistant = computed(
-  () => props.conversation.getMessage(props.messageId).role === Role.Assistant
-)
+const message = computed(() => {
+  return props.conversation.getMessage(props.messageId)
+})
+const isAssistant = computed(() => message.value.role === Role.Assistant)
 watch(page, (newValue) => {
   props.conversation.toggleMessage(peerIds[newValue - 1])
 })
+
+const onResubmit = () => {
+  editing.value = false
+  props.resubmit(input.value, props.messageId)
+  props.conversation.clearResubmit()
+}
+
+const onEdit = () => {
+  input.value = message.value.content
+  editing.value = true
+  props.conversation.setResubmit(() => {
+    onResubmit()
+  })
+}
 </script>
 
 <style scoped>
