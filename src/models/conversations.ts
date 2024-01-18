@@ -43,6 +43,14 @@ export class Conversation {
   meta: IConversationMeta
   mapping: Map<string, IMappingItem>
   scrollToBottom: Function | null = null
+  resubmit: Function | null = null
+
+  setResubmit(fn: Function) {
+    this.resubmit = fn
+  }
+  clearResubmit() {
+    this.resubmit = null
+  }
 
   constructor() {
     this.meta = {
@@ -73,7 +81,15 @@ export class Conversation {
       for (const [messageId, message] of Object.entries(res.messages)) {
         const parent = this.mapping.get(message.parent)
         if (parent) {
-          parent.children.push(messageId)
+          let index = parent.children.length
+          for (let i = 0; i < parent.children.length; i++) {
+            const child = this.getMessage(parent.children[i])
+            if ((message?.created_at ?? 0) < (child?.created_at ?? 0)) {
+              index = i
+              break
+            }
+          }
+          parent.children.splice(index, 0, messageId)
         }
       }
 
@@ -132,7 +148,7 @@ export class Conversation {
 
   toggleMessage(newId: string) {
     let stack = [newId]
-    let leafId = ''
+    let leafId = newId
     while (stack.length > 0) {
       const cur = stack.pop() as string
       const children = this.mapping.get(cur)?.children ?? []
@@ -153,15 +169,14 @@ export class Conversation {
   getPeerIds(id: string): string[] {
     return this.mapping.get(this.getMessage(id).parent)?.children ?? []
   }
-  buildCompletionsRequest(): ChatCompletionCreateParamsStreaming {
+  buildCompletionsRequest(
+    newMsg: Set<string>
+  ): ChatCompletionCreateParamsStreaming {
     const messages: ChatCompletionMessageParam[] = []
     const historyIds = this.getMessageIds(this.meta.current_node_id)
     historyIds.forEach((id) => {
       const message = this.getMessage(id)
-      if (
-        (this.meta.id === '' && message.role === 'system') ||
-        message.id === this.meta.current_node_id
-      ) {
+      if (newMsg.has(message.id)) {
         messages.push(message)
       } else {
         messages.push({
@@ -172,6 +187,7 @@ export class Conversation {
     })
     return {
       id: this.meta.id,
+      current_node_id: this.meta.current_node_id,
       model: this.meta.model,
       messages: messages,
       stream: true,
