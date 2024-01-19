@@ -4,7 +4,7 @@
     v-model="snackbarStore.visible"
     rounded="pill"
     :timeout="2000"
-    color="error"
+    :color="snackbarStore.color"
   >
     {{ snackbarStore.text }}
     <template #actions>
