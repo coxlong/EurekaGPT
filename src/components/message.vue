@@ -27,7 +27,7 @@
                 label="Label"
                 variant="solo"
               />
-              <span v-else>{{ conversation.getMessage(id).content }}</span>
+              <md-preview v-else :text="conversation.getMessage(id).content" />
             </v-window-item>
           </v-window>
         </div>

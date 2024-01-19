@@ -74,7 +74,10 @@ app.use(vuetify)
 const snackbarStore = useSnackbarStore()
 window.snackbar = {
   error: (text: string) => {
-    snackbarStore.show(text)
+    snackbarStore.show(text, 'error')
+  },
+  success: (text: string) => {
+    snackbarStore.show(text, 'success')
   }
 }
 app.mount('#app')
