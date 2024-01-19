@@ -12,6 +12,7 @@ declare module 'vue' {
     Message: typeof import('./src/components/message.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    RowContainer: typeof import('./src/components/row-container.vue')['default']
     SvgIcon: typeof import('./src/components/svg-icon.vue')['default']
   }
 }

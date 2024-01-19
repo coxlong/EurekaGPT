@@ -4,7 +4,7 @@
       ref="scrollDiv"
       v-scroll.self="onScroll"
       class="flex-grow-1 flex-shrink-1 w-100 d-flex flex-column"
-      style="flex-basis: 0; overflow-y: scroll"
+      style="flex-basis: 0; overflow-y: scroll; overflow-x: hidden"
     >
       <div
         v-if="
@@ -40,51 +40,53 @@
         </v-row>
       </div>
       <div v-for="id in messageIds" v-else :key="id">
-        <v-row no-gutters>
-          <v-col lg="6" offset-lg="3" md="8" offset-md="2">
-            <message
-              :message-id="id"
-              :conversation="conversations.current"
-              :regenerate="regenerate"
-              :resubmit="resubmit"
-              :running="running"
-            />
-          </v-col>
-        </v-row>
+        <row-container>
+          <message
+            :message-id="id"
+            :conversation="conversations.current"
+            :regenerate="regenerate"
+            :resubmit="resubmit"
+            :running="running"
+          />
+        </row-container>
       </div>
     </div>
     <div class="w-100">
       <v-btn @click="onClear">New</v-btn>
       <div>
-        <v-textarea
-          v-model="prompt"
-          variant="outlined"
-          auto-grow
-          rows="1"
-          class="prompt_input"
-        >
-          <template #append-inner>
-            <v-icon
-              v-if="!running"
-              :color="
-                prompt !== ''
-                  ? theme.global.current.value.colors['on-background']
-                  : ''
-              "
-              :class="{ 'opacity-1': prompt != '' }"
-              @click="onSubmit"
-            >
-              mdi-rocket-launch
-            </v-icon>
-            <v-icon
-              v-else
-              :color="theme.global.current.value.colors['on-background']"
-              @click="onCancel"
-            >
-              mdi-stop-circle
-            </v-icon>
-          </template>
-        </v-textarea>
+        <row-container>
+          <v-textarea
+            v-model="prompt"
+            variant="outlined"
+            auto-grow
+            rows="1"
+            max-rows="10"
+            rounded="xl"
+            class="prompt_input"
+          >
+            <template #append-inner>
+              <v-icon
+                v-if="!running"
+                :color="
+                  prompt !== ''
+                    ? theme.global.current.value.colors['on-background']
+                    : ''
+                "
+                :class="{ 'opacity-1': prompt != '' }"
+                @click="onSubmit"
+              >
+                mdi-rocket-launch
+              </v-icon>
+              <v-icon
+                v-else
+                :color="theme.global.current.value.colors['on-background']"
+                @click="onCancel"
+              >
+                mdi-stop-circle
+              </v-icon>
+            </template>
+          </v-textarea>
+        </row-container>
       </div>
     </div>
   </v-container>

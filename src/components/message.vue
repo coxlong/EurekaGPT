@@ -3,18 +3,18 @@
     class="d-flex"
     :class="{ 'flex-row-reverse': mdAndDown && !isAssistant }"
   >
-    <v-avatar v-if="isAssistant" color="primary" class="ma-2">
-      <svg-icon icon-class="chat" size="30" />
+    <v-avatar v-if="isAssistant" class="ma-2" size="30">
+      <svg-icon icon-class="chat" size="30" style="color: black" />
     </v-avatar>
-    <v-avatar v-else color="primary" class="ma-2">
+    <v-avatar v-else class="ma-2" size="30">
       <img :src="userStore.avatar" class="w-100" :alt="userStore.username" />
     </v-avatar>
     <div
-      class="d-flex flex-column w-100 pt-3"
+      class="d-flex flex-column w-100 pt-1"
       :class="mdAndDown && !isAssistant ? 'align-end' : 'align-start'"
     >
-      <v-card max-width="80%">
-        <div class="pa-1">
+      <div class="pa-2" :style="{ maxWidth: xs ? '80%' : '90%' }">
+        <div>
           <v-window v-model="page">
             <v-window-item
               v-for="(id, idx) in peerIds"
@@ -31,7 +31,7 @@
             </v-window-item>
           </v-window>
         </div>
-      </v-card>
+      </div>
       <v-card-actions v-if="!editing">
         <v-pagination
           v-if="peerIds.length > 1"
@@ -75,7 +75,7 @@ import { useDisplay } from 'vuetify'
 import { useUserStore } from '@/stores/user'
 import { Conversation } from '@/models/conversations'
 
-const { mdAndDown } = useDisplay()
+const { mdAndDown, xs } = useDisplay()
 const userStore = useUserStore()
 const props = defineProps<{
   messageId: string
