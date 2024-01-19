@@ -3,18 +3,22 @@
     class="d-flex"
     :class="{ 'flex-row-reverse': mdAndDown && !isAssistant }"
   >
-    <v-avatar v-if="isAssistant" color="primary" class="ma-2">
-      <svg-icon icon-class="chat" size="30" />
+    <v-avatar v-if="isAssistant" class="ma-2" size="30">
+      <svg-icon icon-class="chat" size="30" style="color: black" />
     </v-avatar>
-    <v-avatar v-else color="primary" class="ma-2">
+    <v-avatar v-else class="ma-2" size="30">
       <img :src="userStore.avatar" class="w-100" :alt="userStore.username" />
     </v-avatar>
     <div
-      class="d-flex flex-column w-100 pt-3"
+      class="d-flex flex-column w-100 pt-1 content-container"
       :class="mdAndDown && !isAssistant ? 'align-end' : 'align-start'"
     >
-      <v-card max-width="80%">
-        <div class="pa-1">
+      <v-card
+        class="pt-2"
+        :style="{ maxWidth: xs ? '80%' : '90%' }"
+        variant="text"
+      >
+        <div>
           <v-window v-model="page">
             <v-window-item
               v-for="(id, idx) in peerIds"
@@ -32,29 +36,43 @@
           </v-window>
         </div>
       </v-card>
-      <v-card-actions v-if="!editing">
-        <v-pagination
-          v-if="peerIds.length > 1"
-          v-model="page"
-          :length="peerIds.length"
-          :total-visible="peerIds.length"
-          size="x-small"
-          density="comfortable"
-          rounded="circle"
-          class="message-pagination"
-        />
-        <v-btn
-          v-if="isAssistant && !running"
-          density="compact"
-          icon="mdi-refresh"
-          @click="regenerate(message.parent)"
-        />
-        <v-btn
-          v-if="!isAssistant && !running"
-          density="compact"
-          icon="mdi-pencil"
-          @click="onEdit"
-        />
+      <v-card-actions
+        v-if="!editing"
+        :style="{ padding: 0, minHeight: '18px !important' }"
+      >
+        <div v-if="peerIds.length > 1 && !running" class="mr-5 d-flex">
+          <svg-icon
+            icon-class="arrow-left"
+            :style="`color: ${page === 1 ? '#888888' : 'black'}`"
+            @click="page = page === 1 ? 1 : page - 1"
+          />
+          <span style="font-size: 0.75rem; line-height: 16px">
+            {{ page }}/{{ peerIds.length }}
+          </span>
+          <svg-icon
+            icon-class="arrow-right"
+            :style="`color: ${page === peerIds.length ? '#888888' : 'black'}`"
+            @click="page = page === peerIds.length ? peerIds.length : page + 1"
+          />
+        </div>
+        <div class="actions-btn">
+          <svg-icon
+            v-if="isAssistant && !running"
+            icon-class="refresh"
+            size="18"
+            style="color: #888888"
+            @click="regenerate(message.parent)"
+          />
+        </div>
+        <div class="actions-btn">
+          <svg-icon
+            v-if="!isAssistant && !running"
+            icon-class="edit"
+            size="18"
+            style="color: #888888"
+            @click="onEdit"
+          />
+        </div>
       </v-card-actions>
       <v-card-actions v-else>
         <v-btn density="compact" icon="mdi-refresh" @click="onResubmit">
@@ -75,7 +93,7 @@ import { useDisplay } from 'vuetify'
 import { useUserStore } from '@/stores/user'
 import { Conversation } from '@/models/conversations'
 
-const { mdAndDown } = useDisplay()
+const { mdAndDown, xs } = useDisplay()
 const userStore = useUserStore()
 const props = defineProps<{
   messageId: string
@@ -128,5 +146,17 @@ const onEdit = () => {
 .message-pagination :deep(.v-pagination__item) {
   margin-left: 0;
   margin-right: 0;
+}
+
+.actions-btn {
+  display: none;
+}
+.actions-btn:hover {
+  svg {
+    color: black !important;
+  }
+}
+.content-container:hover .actions-btn {
+  display: flex;
 }
 </style>
