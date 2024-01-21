@@ -4,7 +4,7 @@
     :class="{ 'flex-row-reverse': mdAndDown && !isAssistant }"
   >
     <v-avatar v-if="isAssistant" class="ma-2" size="30">
-      <svg-icon icon-class="chat" size="30" style="color: black" />
+      <svg-icon icon-class="openai" size="30" style="color: black" />
     </v-avatar>
     <v-avatar v-else class="ma-2" size="30">
       <img :src="userStore.avatar" class="w-100" :alt="userStore.username" />

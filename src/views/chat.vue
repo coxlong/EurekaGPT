@@ -1,16 +1,38 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" app :temporary="mobile">
+      <template #prepend>
+        <v-list-item color="black" rounded="lg" class="mx-2" @click="onClear">
+          <template #prepend>
+            <v-avatar>
+              <svg-icon icon-class="openai" size="25" />
+            </v-avatar>
+            <span class="text-body-2"> New Chat</span>
+          </template>
+
+          <template #append> <svg-icon icon-class="new-chat" /> </template>
+        </v-list-item>
+        <v-divider />
+      </template>
+
       <v-list @click:select="onToggleConversation">
         <v-list-item
           v-for="item in items"
           :key="item.value"
           :value="item.value"
           :active="conversations.current.meta.id === item.value"
-          color="primary"
-          rounded="xl"
+          color="black"
+          rounded="lg"
+          class="mx-2"
+          :style="{ minHeight: '40px' }"
         >
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
+          <v-list-item-subtitle
+            v-if="item.type === 'subheader'"
+            :style="{ fontSize: '.8rem' }"
+          >
+            {{ item.title }}
+          </v-list-item-subtitle>
+          <p v-else class="">{{ item.title }}</p>
         </v-list-item>
       </v-list>
 
@@ -31,7 +53,7 @@
         </v-list>
       </template>
     </v-navigation-drawer>
-    <v-app-bar app :elevation="1">
+    <v-app-bar app :elevation="0">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title>Chat</v-toolbar-title>
     </v-app-bar>
@@ -103,7 +125,7 @@ const items = computed(() => {
       }
     }
     result.push({
-      title: item.title === '' ? 'New chat ' + item.id : item.title,
+      title: item.title === '' ? 'New chat ' : item.title,
       value: item.id
     })
   })
@@ -112,6 +134,11 @@ const items = computed(() => {
 
 const onToggleConversation = (item: any) => {
   router.push(`/c/${item.id}`)
+}
+
+const onClear = () => {
+  conversations.current.clear()
+  router.push('/')
 }
 </script>
 

@@ -17,7 +17,7 @@
             <v-select
               v-model="conversations.current.meta.model"
               label="Model"
-              :items="['gpt-3.5-turbo', 'gpt-4']"
+              :items="modelList"
               variant="solo"
             />
           </v-col>
@@ -52,7 +52,6 @@
       </div>
     </div>
     <div class="w-100">
-      <v-btn @click="onClear">New</v-btn>
       <div>
         <row-container>
           <v-textarea
@@ -63,6 +62,7 @@
             max-rows="10"
             rounded="xl"
             class="prompt_input"
+            placeholder="Message ChatGPT…"
           >
             <template #append-inner>
               <v-icon
@@ -112,6 +112,8 @@ const cancelFun = ref<Function | null>(null)
 const scrollDiv = ref<HTMLElement | null>(null)
 const conversations = useConversationsStore()
 const configStore = useConfigStore()
+
+const modelList = ['gpt-4-1106-preview', 'gpt-4', 'gpt-3.5-turbo']
 
 const messageIds = computed(() => {
   return conversations.current.getMessageIds(
@@ -204,11 +206,6 @@ const onCancel = () => {
     cancelFun.value()
     cancelFun.value = null
   }
-}
-
-const onClear = () => {
-  conversations.current.clear()
-  router.push('/')
 }
 
 const onScroll = (e: any) => {
